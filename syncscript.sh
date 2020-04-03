@@ -61,3 +61,4 @@ echo "* caching motu scn"
 Rscript R/motu_scn.R
 
 echo "finished updating raw scan caches at '$(date +%F\ %T)'"
+notify-send "finished running shell script"
