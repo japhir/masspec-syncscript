@@ -1,18 +1,18 @@
 #!/bin/sh
 echo "$(date +%F\ %T) start syncing"
 
-# is cisco connected? this code can be left uncommented!
-if ip link | grep -qs "^[^123]: cscotun0"; then
+# is cisco/eduroam connected? this code can be left uncommented!
+if [ "$(ip link | grep -qs '^[^123]: cscotun0')" ] || [ "$(nmcli -t -f active,ssid dev wifi | egrep '^yes')" = "yes:eduroam" ]; then
     # is /mnt/rawdata not mounted?
-    if grep -qs '/mnt/rawdata' /proc/mounts; then
-	echo "cisco is connected and samba drive is already mounted"
+    if [ "$(grep -qs '/mnt/rawdata' /proc/mounts)" ]; then
+	echo "cisco/eduroam is connected and samba drive is already mounted"
     else
 	echo "mounting samba drive as cifs" &&
 	    sudo mount -t cifs //geodc01.geo.uu.nl/gml/rawdata /mnt/rawdata -o credentials=/etc/samba/credentials/share,uid=japhir,gid=wheel ||
 		echo "failed to mount samba drive" && exit 1
     fi
 
-    # by now cisco should be on and it should be mounted
+    # by now cisco/eduroam should be on and it should be mounted
     echo "* syncing pacman"
     echo "** cafs"
     if [ "$(grep "sent .* bytes" logs/pacman_caf.log | tail -1 | awk '{ print $1 }')" = "$(date +'%Y/%m/%d')" ]; then
@@ -61,17 +61,20 @@ if ip link | grep -qs "^[^123]: cscotun0"; then
 	echo "** motu_scn has already been synced today"
     else
 	rsync -r -t --progress --numeric-ids --log-file=logs/motu_scn.log \
+	      /mnt/rawdata/253pluskiel/BG\ Folder/ \
+	      /home/japhir/Documents/archive/motu/scn
+	rsync -r -t --progress --numeric-ids --log-file=logs/motu_scn.log \
 	      /mnt/rawdata/253pluskiel/BG\ 2019/ \
 	      /home/japhir/Documents/archive/motu/scn
 	rsync -r -t --progress --numeric-ids --log-file=logs/motu_scn.log \
-	      /mnt/rawdata/253pluskiel/BG\ Folder/ \
+	      /mnt/rawdata/253pluskiel/BG\ 2020/ \
 	      /home/japhir/Documents/archive/motu/scn
     fi
     echo "finished syncing at '$(date +%F\ %T)'"
 else
     grep -qs '/mnt/rawdata' /proc/mounts &&
-	echo "/mnt/rawdata is mounted but there is no connection to cisco!" && exit 1
-    echo "there is no connection to cisco and /mnt/rawdata is not mounted"
+	echo "/mnt/rawdata is mounted but there is no connection to cisco or eduroam!" && exit 1
+    echo "there is no connection to cisco or eduroam and /mnt/rawdata is not mounted"
 fi
 
 if [ "$1" = "R" ]; then
