@@ -119,52 +119,64 @@ if [ -n "$(ip link | grep '^[^123]: cscotun0')" -o "$(nmcli -t -f active,ssid de
 	rsync -r -t --progress --numeric-ids --log-file=logs/motu_scn.log \
 	      /mnt/rawdata/253pluskiel/BG\ 2020/ \
 	      /home/japhir/Documents/archive/motu/scn
-    fi
+	rsync -r -t --progress --numeric-ids --log-file=logs/motu_scn.log \
+	      /mnt/rawdata/253pluskiel/BG\ 2021/ \
+	      /home/japhir/Documents/archive/motu/scn
+    fi # motu_scn sync today?
     echo "finished syncing at '$(date +%F\ %T)'"
-else
+else # cisco/eduroam connected
     grep -qs '/mnt/rawdata' /proc/mounts &&
 	echo "/mnt/rawdata is mounted but there is no connection to cisco or eduroam!" && exit 1
     echo "there is no connection to cisco or eduroam and /mnt/rawdata is not mounted"
-fi
+fi # cisco/eduroam connected
 
+# pass R flag?
 if [ "$1" = "R" ]; then
     echo "you passed the R flag!"
 
+    # motu
     if [ "$2" = "motu" -o "$3" = "motu" ]; then
 	echo "* caching motu into R"
+        # did
 	if [ "$2" = "did" -o "$3" = "did" -o "$4" = "did" ]; then
 	    echo "** caching motu dids"
 	    Rscript R/motu_dids.R
-	fi
+	fi # did
+	# scn
 	if [ "$2" = "scn" -o "$3" = "scn" -o "$4" = "scn" ]; then
 	    echo "** caching motu scn"
 	    Rscript R/motu_scn.R
-	fi
-    else
+	fi # scn
+    else # motu
 	echo "* not caching motu"
-    fi
+    fi # motu
+
+    # pacman
     if [ "$2" = "pacman" -o "$3" = "pacman" ]; then
 	echo "* caching pacman into R"
+	# caf
 	if [ "$2" = "caf" -o "$3" = "caf" -o "$4" = "caf" ]; then
 	   echo "** cafs"
 	   Rscript R/pacman_cafs.R
-	fi
+	fi # caf
+	# did
 	if [ "$2" = "did" -o "$3" = "did" -o "$4" = "did" ]; then
 	   echo "** dids"
 	   Rscript R/pacman_dids.R
-	fi
+	fi # did
+	# scn
 	if [ "$2" = "scn" -o "$3" = "scn" -o "$4" = "scn" ]; then
 	   echo "** scn 2018"
 	   Rscript R/pacman_scn_2018.R
 	   echo "** scn 2019"
 	   Rscript R/pacman_scn_2019.R
-	fi
-    else
+	fi # scn
+    else # pacman
 	echo "* not caching pacman"
-    fi
-else
+    fi # pacman
+    echo "$(date +%F\ %T) finished updating R caches"
+else # R
     echo "you did not pass the R flag."
-fi
+fi # R
 
-echo "$(date +%F\ %T) finished updating raw scan caches"
 notify-send "finished running $0"
