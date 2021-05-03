@@ -78,7 +78,7 @@ if [ -n "$(ip link | grep '^[^123]: cscotun0')" -o "$(nmcli -t -f active,ssid de
     else
 	rsync -r -t --progress --numeric-ids --log-file=logs/pacman_scn_2018.log \
 	      /mnt/rawdata/Kiel\ 253/clumped/Scans/ \
-	      /home/japhir/Documents/archive/pacman/scn_2018
+	      /home/japhir/Documents/archive/pacman/scn/scn_2018
     fi # pacman_scn sync today?
 
     echo "*** 2019 and newer"
@@ -88,7 +88,7 @@ if [ -n "$(ip link | grep '^[^123]: cscotun0')" -o "$(nmcli -t -f active,ssid de
     else
 	rsync -r -t --progress --numeric-ids --log-file=logs/pacman_scn_2019.log \
 	      /mnt/rawdata/Kiel\ 253/Background\ Scans/ \
-	      /home/japhir/Documents/archive/pacman/scn_2019
+	      /home/japhir/Documents/archive/pacman/scn/scn_2019
     fi # pacman_scn 2019 sync today?
 
     echo "* synching motu"
