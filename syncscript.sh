@@ -1,16 +1,14 @@
 #!/bin/sh
 # help?
 if [ "$1" = "-h" -o "$1" = "help" -o "$1" = "--help" ]; then
-    echo "Usage: ./syncscript.sh [force] [R] [MASSPEC] [FILETYPE]"
-    echo "synchronise masspec files to local and chache into R"
-    echo "Example: ./syncscript.sh R motu did scn"
+    echo "Usage: ./syncscript.sh [force] [MASSPEC] [FILETYPE]"
+    echo "synchronise masspec files to local"
+    echo "Example: ./syncscript.sh motu did scn"
     echo "FILETYPE can contain multiple filetypes"
     echo ""
     echo "run without arguments to try to mount '/mnt/rawdata/'"
     echo "it will try to rsync all the files over if they haven't been synced yet today."
     echo "if you want to force synchronisation, pass the 'force' argument."
-    echo ""
-    echo "type R as the first argument to run the R scripts"
     echo ""
     echo "then set [MASSPEC] to 'motu' or 'pacman'"
     echo ""
@@ -33,7 +31,7 @@ if [  "$1" = "-f" -o "$1" = "force" -o "$1" = "--force" ]; then
 fi # forced?
 
 # is cisco/eduroam connected?
-if [ -n "$(ip link | grep '^[^123]: cscotun0')" -o "$(nmcli -t -f active,ssid dev wifi | egrep '^yes')" = "yes:eduroam" ]; then
+if [ -n "$(ip link | grep '^[^123]: cscotun0')" -o "$(nmcli -t -f active,ssid dev wifi | egrep '^yes')" = "yes:Utrecht University" ]; then
     # is /mnt/rawdata not mounted?
     if [ -n "$(grep '/mnt/rawdata ' /proc/mounts)" ]; then
 	echo "cisco/eduroam is connected and samba drive is already mounted"
@@ -132,54 +130,5 @@ else # cisco/eduroam connected
 	echo "/mnt/rawdata is mounted but there is no connection to cisco or eduroam!" && exit 1
     echo "there is no connection to cisco or eduroam and /mnt/rawdata is not mounted"
 fi # cisco/eduroam connected
-
-# pass R flag?
-if [ "$1" = "R" ]; then
-    echo "you passed the R flag!"
-
-    # motu
-    if [ "$2" = "motu" -o "$3" = "motu" ]; then
-	echo "* caching motu into R"
-        # did
-	if [ "$2" = "did" -o "$3" = "did" -o "$4" = "did" ]; then
-	    echo "** caching motu dids"
-	    Rscript R/motu_dids.R
-	fi # did
-	# scn
-	if [ "$2" = "scn" -o "$3" = "scn" -o "$4" = "scn" ]; then
-	    echo "** caching motu scn"
-	    Rscript R/motu_scn.R
-	fi # scn
-    else # motu
-	echo "* not caching motu"
-    fi # motu
-
-    # pacman
-    if [ "$2" = "pacman" -o "$3" = "pacman" ]; then
-	echo "* caching pacman into R"
-	# caf
-	if [ "$2" = "caf" -o "$3" = "caf" -o "$4" = "caf" ]; then
-	   echo "** cafs"
-	   Rscript R/pacman_cafs.R
-	fi # caf
-	# did
-	if [ "$2" = "did" -o "$3" = "did" -o "$4" = "did" ]; then
-	   echo "** dids"
-	   Rscript R/pacman_dids.R
-	fi # did
-	# scn
-	if [ "$2" = "scn" -o "$3" = "scn" -o "$4" = "scn" ]; then
-	   echo "** scn 2018"
-	   Rscript R/pacman_scn_2018.R
-	   echo "** scn 2019"
-	   Rscript R/pacman_scn_2019.R
-	fi # scn
-    else # pacman
-	echo "* not caching pacman"
-    fi # pacman
-    echo "$(date +%F\ %T) finished updating R caches"
-else # R
-    echo "you did not pass the R flag."
-fi # R
 
 notify-send "finished running $0"
