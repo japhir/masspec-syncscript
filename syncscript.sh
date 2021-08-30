@@ -120,6 +120,9 @@ if [ -n "$(ip link | grep '^[^123]: cscotun0')" -o "$(nmcli -t -f active,ssid de
 	      /mnt/rawdata/253pluskiel/BG\ 2020/ \
 	      /home/japhir/Documents/archive/motu/scn
 	rsync -r -t --progress --numeric-ids --log-file=logs/motu_scn.log \
+	      /mnt/rawdata/253pluskiel/Background\ scans\ 2020/ \
+	      /home/japhir/Documents/archive/motu/scn
+	rsync -r -t --progress --numeric-ids --log-file=logs/motu_scn.log \
 	      /mnt/rawdata/253pluskiel/BG\ 2021/ \
 	      /home/japhir/Documents/archive/motu/scn
     fi # motu_scn sync today?
